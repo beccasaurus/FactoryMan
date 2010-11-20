@@ -1,0 +1,172 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Reflection;
+using System.Collections;
+
+/// <summary>
+/// FactoryMan namespace ...
+/// </summary>
+namespace FactoryMan {
+ 
+    /// <summary>
+    /// Factory class ...
+    /// </summary>
+    public class Factory {
+
+        /// <summary>
+        /// static method ...
+        /// </summary>
+        /// <param name="objectType">it is cool</param>
+        /// <param name="anonymousType">also cool</param>
+        /// <returns>some cool shit!</returns>
+        public static Factory Define(Type objectType, object anonymousType) {
+            return new Factory(objectType, anonymousType);
+        }
+
+        public static string         GenerateMethod;
+        public static Action<object> GenerateAction;
+
+        string _name;
+        internal Dictionary<string, object>               _properties     = new Dictionary<string, object>();
+        internal Dictionary<string, Func<object, object>> _funcProperties = new Dictionary<string, Func<object, object>>();
+        internal IDictionary _typedFuncProperties;
+
+        public Factory() { }
+
+        public Factory(Type objectType) {
+            ObjectType = objectType;
+        }
+
+        public Factory(Type objectType, string name) {
+            ObjectType = objectType;
+            Name       = name;
+        }
+
+        public Factory(Type objectType, object anonymousType) {
+            ObjectType = objectType;
+            Add(anonymousType);
+        }
+
+        public virtual Type ObjectType { get; set; }
+        public virtual Action<object> InstanceGenerateAction { get; set; }
+        public virtual string InstanceGenerateMethod { get; set; }
+
+        public virtual string Name {
+            get {
+                if (_name == null)
+                    if (ObjectType != null)
+                        _name = ObjectType.Name;
+                return _name;
+            }
+            set { _name = value;  }
+        }
+
+        public virtual int Count {
+            get {
+                var count = _properties.Count + _funcProperties.Count;
+                if (_typedFuncProperties != null)
+                    count += _typedFuncProperties.Count;
+                return count;
+            }
+        }
+
+        public virtual object this[string propertyName] {
+            get {
+                if (_properties.ContainsKey(propertyName))
+                    return _properties[propertyName];
+                else if (_funcProperties.ContainsKey(propertyName))
+                    return _funcProperties[propertyName];
+                else
+                    return null;
+            }
+        }
+
+        public virtual Factory Add(object anonymousType) {
+            foreach (var property in anonymousType.ToDictionary())
+                Add(property.Key, property.Value);
+            return this;
+        }
+
+        public virtual Factory Add(string propertyName, object propertyValue) {
+            _properties.Add(propertyName, propertyValue);
+            return this;
+        }
+
+        public virtual Factory Add(string propertyName, Func<object, object> propertyValue) {
+            _funcProperties.Add(propertyName, propertyValue);
+            return this;
+        }
+
+        public virtual Func<object, object> Func(string propertyName) {
+            return _funcProperties[propertyName];
+        }
+
+        public virtual IEnumerator<KeyValuePair<string, object>> GetEnumerator() {
+            foreach (var keyValuePair in _properties)
+                yield return keyValuePair;
+            foreach (var keyValuePair in _funcProperties)
+                yield return new KeyValuePair<string, object>(keyValuePair.Key, (object)keyValuePair.Value);
+        }
+
+        public virtual Dictionary<string, object> Properties {
+            get {
+                var properties = new Dictionary<string, object>();
+                foreach (var property in this)
+                    properties.Add(property.Key, property.Value);
+                return properties;
+            }
+        }
+
+        public virtual object Build() {
+            return Build(null);
+        }
+        public virtual object Build(object overrides) {
+            var instance   = Activator.CreateInstance(ObjectType);
+            var properties = Properties;
+
+            if (overrides != null)
+                foreach (var property in overrides.ToDictionary())
+                    properties[property.Key] = property.Value;
+
+            foreach (var property in properties)
+                if (property.Value.GetType().FullName.StartsWith("System.Func")) { // call Invoke() if it's a Func
+                    var value = property.Value.GetType().GetMethod("Invoke").Invoke(property.Value, new object[] { instance });
+                    ObjectType.GetProperty(property.Key).SetValue(instance, value, new object[] { });
+                } else
+                    ObjectType.GetProperty(property.Key).SetValue(instance, property.Value, new object[] { });
+
+            return instance;
+        }
+
+        // Alias Gen() to Generate()
+        public virtual object Gen()         { return Generate();  }
+        public virtual object Gen(object o) { return Generate(o); }
+
+        public virtual object Generate() {
+            var instance = Build();
+            RunGenerateAction(instance);
+            return instance;
+        }
+
+        public virtual object Generate(object overrides) {
+            var instance = Build(overrides);
+            RunGenerateAction(instance);
+            return instance;
+        }
+
+        internal void RunGenerateAction(object instance) {
+            if (InstanceGenerateAction != null)
+                InstanceGenerateAction.Invoke(instance);
+            else if (InstanceGenerateMethod != null)
+                ObjectType.GetMethod(InstanceGenerateMethod).Invoke(instance, new object[] { });
+            else if (GenerateAction != null)
+                GenerateAction.Invoke(instance);
+            else if (GenerateMethod != null)
+                ObjectType.GetMethod(GenerateMethod).Invoke(instance, new object[] { });
+            else
+                throw new Exception("Don't know how to Generate().  Please set GenerateAction or GenerateMethod.");
+        }
+    }
+}
