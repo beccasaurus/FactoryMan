@@ -18,7 +18,7 @@ namespace FactoryMan.Specs {
 
         public string SomeString = "Default Value";
 
-        public void RunToGenerate() { SomeString = "Global generate method ran"; }
-        public void DifferentToGenerate() { SomeString = "instance override method"; }
+        public void RunToCreate() { SomeString = "Global generate method ran"; }
+        public void DifferentToCreate() { SomeString = "instance override method"; }
     }
 }

@@ -25,8 +25,8 @@ namespace FactoryMan {
             return new Factory(objectType, anonymousType);
         }
 
-        public static string         GenerateMethod;
-        public static Action<object> GenerateAction;
+        public static string         CreateMethod;
+        public static Action<object> CreateAction;
 
         string _name;
         internal Dictionary<string, object>               _properties     = new Dictionary<string, object>();
@@ -50,8 +50,8 @@ namespace FactoryMan {
         }
 
         public virtual Type ObjectType { get; set; }
-        public virtual Action<object> InstanceGenerateAction { get; set; }
-        public virtual string InstanceGenerateMethod { get; set; }
+        public virtual Action<object> InstanceCreateAction { get; set; }
+        public virtual string InstanceCreateMethod { get; set; }
 
         public virtual string Name {
             get {
@@ -140,33 +140,33 @@ namespace FactoryMan {
             return instance;
         }
 
-        // Alias Gen() to Generate()
-        public virtual object Gen()         { return Generate();  }
-        public virtual object Gen(object o) { return Generate(o); }
+        // Alias Gen() to Create()
+        public virtual object Gen()         { return Create();  }
+        public virtual object Gen(object o) { return Create(o); }
 
-        public virtual object Generate() {
+        public virtual object Create() {
             var instance = Build();
-            RunGenerateAction(instance);
+            RunCreateAction(instance);
             return instance;
         }
 
-        public virtual object Generate(object overrides) {
+        public virtual object Create(object overrides) {
             var instance = Build(overrides);
-            RunGenerateAction(instance);
+            RunCreateAction(instance);
             return instance;
         }
 
-        internal void RunGenerateAction(object instance) {
-            if (InstanceGenerateAction != null)
-                InstanceGenerateAction.Invoke(instance);
-            else if (InstanceGenerateMethod != null)
-                ObjectType.GetMethod(InstanceGenerateMethod).Invoke(instance, new object[] { });
-            else if (GenerateAction != null)
-                GenerateAction.Invoke(instance);
-            else if (GenerateMethod != null)
-                ObjectType.GetMethod(GenerateMethod).Invoke(instance, new object[] { });
+        internal void RunCreateAction(object instance) {
+            if (InstanceCreateAction != null)
+                InstanceCreateAction.Invoke(instance);
+            else if (InstanceCreateMethod != null)
+                ObjectType.GetMethod(InstanceCreateMethod).Invoke(instance, new object[] { });
+            else if (CreateAction != null)
+                CreateAction.Invoke(instance);
+            else if (CreateMethod != null)
+                ObjectType.GetMethod(CreateMethod).Invoke(instance, new object[] { });
             else
-                throw new Exception("Don't know how to Generate().  Please set GenerateAction or GenerateMethod.");
+                throw new Exception("Don't know how to Create().  Please set CreateAction or CreateMethod.");
         }
     }
 }

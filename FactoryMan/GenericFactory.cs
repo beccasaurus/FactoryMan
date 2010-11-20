@@ -11,7 +11,7 @@ namespace FactoryMan.Generic {
         }
 
         new Dictionary<string, Func<T, object>> _funcProperties = new Dictionary<string, Func<T, object>>();
-        new public Action<T> GenerateAction { get; set; }
+        new public Action<T> CreateAction { get; set; }
 
         public Factory() {
             base._typedFuncProperties = _funcProperties;
@@ -88,28 +88,28 @@ namespace FactoryMan.Generic {
             return instance;
         }
 
-        // Alias Gen() to Generate()
-        public new T Gen()         { return Generate(); }
-        public new T Gen(object o) { return Generate(o); }
+        // Alias Gen() to Create()
+        public new T Gen()         { return Create(); }
+        public new T Gen(object o) { return Create(o); }
 
-        public new T Generate() {
+        public new T Create() {
             var instance = Build();
-            RunGenerateAction(instance);
+            RunCreateAction(instance);
             return instance;
         }
 
-        public new T Generate(object overrides) {
+        public new T Create(object overrides) {
             var instance = Build(overrides);
-            RunGenerateAction(instance);
+            RunCreateAction(instance);
             return instance;
         }
 
-        void RunGenerateAction(T instance) {
+        void RunCreateAction(T instance) {
             try {
-                base.RunGenerateAction(instance);
+                base.RunCreateAction(instance);
             } catch (Exception ex) {
-                if (ex.Message.Contains("Don't know how to Generate") && GenerateAction != null)
-                    GenerateAction(instance);
+                if (ex.Message.Contains("Don't know how to Create") && CreateAction != null)
+                    CreateAction(instance);
                 else
                     throw ex;
             }

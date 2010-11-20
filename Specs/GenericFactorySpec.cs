@@ -42,8 +42,8 @@ namespace FactoryMan.Specs {
 
         [SetUp]
         public void Setup() {
-            Factory.GenerateAction = null;
-            Factory.GenerateMethod = null;
+            Factory.CreateAction = null;
+            Factory.CreateMethod = null;
 
             // reset sequences
             GenericFactories.Num.Number   = 0;
@@ -141,28 +141,28 @@ namespace FactoryMan.Specs {
         }
 
         [Test]
-        public void GenerateCanCallAMethodToSaveInstance() {
+        public void CreateCanCallAMethodToSaveInstance() {
             var factory = new Factory<Dog>().
                             Add("Name", "Snoopy").
                             Add("Breed", (d) => string.Format("A breed for {0} the dog", d.Name));
 
-            factory.GenerateAction = (d) => d.Save();
+            factory.CreateAction = (d) => d.Save();
 
-            var dog = factory.Gen(); // <--- alias for Generate()
+            var dog = factory.Gen(); // <--- alias for Create()
             Assert.That(dog.Name, Is.EqualTo("Snoopy"));
             Assert.That(dog.Breed, Is.EqualTo("A breed for Snoopy the dog"));
             Assert.True(dog.IsSaved);
         }
 
         [Test]
-        public void GenerateCanCallAnActionToSaveInstance() {
+        public void CreateCanCallAnActionToSaveInstance() {
             var factory = new Factory<Dog>().
                             Add("Name", "Snoopy").
                             Add("Breed", (d) => string.Format("A breed for {0} the dog", d.Name));
 
-            factory.InstanceGenerateMethod = "Save";
+            factory.InstanceCreateMethod = "Save";
 
-            var dog = factory.Generate();
+            var dog = factory.Create();
             Assert.That(dog.Name, Is.EqualTo("Snoopy"));
             Assert.That(dog.Breed, Is.EqualTo("A breed for Snoopy the dog"));
             Assert.True(dog.IsSaved);
@@ -202,27 +202,27 @@ namespace FactoryMan.Specs {
         }
 
         [Test]
-        public void CanSetDefaultGenerateActionForAllFactories() {
+        public void CanSetDefaultCreateActionForAllFactories() {
             var factory = new Factory(typeof(Cat));
 
-            Factory.GenerateAction = c => ((Cat)c).SomeString = "Global Generate Run!";
-            Assert.That((factory.Generate() as Cat).SomeString, Is.EqualTo("Global Generate Run!"));
+            Factory.CreateAction = c => ((Cat)c).SomeString = "Global Create Run!";
+            Assert.That((factory.Create() as Cat).SomeString, Is.EqualTo("Global Create Run!"));
 
-            factory.InstanceGenerateAction = c => ((Cat)c).SomeString = "instance override";
-            Assert.That((factory.Generate() as Cat).SomeString, Is.EqualTo("instance override"));
-            Assert.That((new Factory(typeof(Cat)).Generate() as Cat).SomeString, Is.EqualTo("Global Generate Run!"));
+            factory.InstanceCreateAction = c => ((Cat)c).SomeString = "instance override";
+            Assert.That((factory.Create() as Cat).SomeString, Is.EqualTo("instance override"));
+            Assert.That((new Factory(typeof(Cat)).Create() as Cat).SomeString, Is.EqualTo("Global Create Run!"));
         }
 
         [Test]
-        public void CanSetDefaultGenerateMethodForAllFactories() {
+        public void CanSetDefaultCreateMethodForAllFactories() {
             var factory = new Factory<Cat>();
 
-            Factory.GenerateMethod = "RunToGenerate";
-            Assert.That((factory.Generate()).SomeString, Is.EqualTo("Global generate method ran"));
+            Factory.CreateMethod = "RunToCreate";
+            Assert.That((factory.Create()).SomeString, Is.EqualTo("Global generate method ran"));
 
-            factory.InstanceGenerateMethod = "DifferentToGenerate";
-            Assert.That((factory.Generate()).SomeString, Is.EqualTo("instance override method"));
-            Assert.That((new Factory<Cat>()).Generate().SomeString, Is.EqualTo("Global generate method ran"));
+            factory.InstanceCreateMethod = "DifferentToCreate";
+            Assert.That((factory.Create()).SomeString, Is.EqualTo("instance override method"));
+            Assert.That((new Factory<Cat>()).Create().SomeString, Is.EqualTo("Global generate method ran"));
         }
 
         //public void CanCreateAGroupOfFactories() Creating a Factory[] won't work great with generic Factories!
@@ -265,18 +265,18 @@ namespace FactoryMan.Specs {
         }
 
         [Test]
-        public void CanPassAttributesIntoGenerateToOverrideThem() {
-            Factory.GenerateMethod = "Save";
+        public void CanPassAttributesIntoCreateToOverrideThem() {
+            Factory.CreateMethod = "Save";
             var factory = new Factory<Dog>(new {
                 Name = "Rover",
                 Breed = "Golden Retriever"
             });
 
-            var dog = factory.Generate();
+            var dog = factory.Create();
             Assert.That(dog.Name, Is.EqualTo("Rover"));
             Assert.That(dog.Breed, Is.EqualTo("Golden Retriever"));
 
-            dog = factory.Generate(new { Name = "Snoopy" });
+            dog = factory.Create(new { Name = "Snoopy" });
             Assert.That(dog.Name, Is.EqualTo("Snoopy"));
             Assert.That(dog.Breed, Is.EqualTo("Golden Retriever"));
         }
