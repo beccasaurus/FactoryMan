@@ -6,7 +6,7 @@ write focused and readable tests, but it can be used for anything.  If you're fa
 factories are a replacement for fixtures.
 
 For more about the intent of FactoryMan, see [factory_girl][], the library that this is based on.  
-Much of the text from this page is taken verbatim from the factory_girl README;
+Much of the text from this page is taken verbatim from the [factory_girl][] README
 
 Download
 --------
