@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace FactoryMan.Generic {
+namespace FactoryMan.Sequences.Generic {
 
     public class Sequence<T> {
         public int Number = 0;

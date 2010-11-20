@@ -130,6 +130,11 @@ Sequences can be used in lazy attributes:
 
 Generics can be used to specify the Type that your Sequence returns:
 
+    // we put sequences in a different namespace so you can easily specify whether you want to use 
+    // the generic sequence or the regular one.  As opposed to factories, you don't get much benefit 
+    // from the generic sequence and I like to use the regular one (with my generic factories).
+    using FactoryMan.Sequences.Generic;
+
     var email = new Sequence<char[]>(n => string.Format("String with number:{0}", n).ToCharArray());
 
 Example Usage
@@ -142,7 +147,52 @@ chance to use FactoryMan more, I will probably provide some best practices and a
 
 For now, here is some example usage from one of the specs ([GenericFactorySpec.cs](http://github.com/remi/FactoryMan/blob/master/Specs/GenericFactorySpec.cs#L10-36))
 
-    ....
+    // You don't have to use factories this way.  This is just one way to make your factories available to your tests.
+    // You could also manage a List<Factory>, but you'll lose the benefit of typing that generic factories give you.
+    // That's why I like to make strongly typed fields for each of my factories.
+
+    using FactoryMan.Generic;
+    using FactoryMan.Sequences;
+
+    public class Factories {
+        public static Factories F = new Factories();
+
+        public static Sequence Num   = new Sequence(n => n.ToString());
+        public static Sequence Breed = new Sequence(n => "Golden " + n.ToString() + " Retriever");
+
+        public Factory<Dog> Dog = new Factory<Dog>(new {
+            Name  = new Func<Dog, object>(d => "Rover #" + Num.Next()),
+            Breed = new Func<Dog, object>(d => Breed.Next())
+        });
+
+        public Factory<DogToy> DogToy = new Factory<DogToy>(new {
+            Name = "Kong",
+            Dog  = new Func<DogToy, object>(dt => F.Dog.Build()) // Creating a DogToy creates a Dog to associate to it
+        });
+    }
+
+    [TestFixture]
+    public class DogTest {
+
+        Factories f = new Factories();
+
+        [Test]
+        public void RequiresBreed() {
+            Assert.False( f.Dog.Build(new { Breed = null     }).IsValid );
+            Assert.False( f.Dog.Build(new { Breed = ""       }).IsValid );
+            Assert.True(  f.Dog.Build(new { Breed = "Beagle" }));
+        }
+
+        [Test]
+        public void RequiresUniqueName) {
+            Assert.False(f.Dog.Create(new { Username = null        }));
+            Assert.False(f.Dog.Create(new { Username = ""          }));
+            Assert.True( f.Dog.Create(new { Username = "BobSmith"  }));
+            Assert.False(f.Dog.Create(new { Username = "BobSmith"  }));
+            Assert.True( f.Dog.Create(new { Username = "Different" }));
+        }
+
+    }
 
 [factory_girl]:  http://github.com/thoughtbot/factory_girl
 [Download .dll]: http://github.com/remi/FactoryMan/raw/releases/FactoryMan/bin/Debug/FactoryMan.dll

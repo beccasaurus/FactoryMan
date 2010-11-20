@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using NUnit.Framework;
 using FactoryMan.Generic;
+using FactoryMan.Sequences.Generic;
 
 namespace FactoryMan.Specs {
 
