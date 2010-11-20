@@ -64,10 +64,13 @@ FactoryMan supports different build strategies: Build() and Create(), Properties
 
 No matter which strategy is used, it’s possible to override the defined attributes by passing an anonymous object:
 
-    // Build a g instance and override the Name property
-    var dog = dogFactory.Build(new { Name = "Rover" });
-    Console.WriteLine(dog.Name);
-    // => Joe
+    // Build a instance and override the Name property
+
+    var dog = dogFactory.Build();
+    // dog.Name is "Snoopy"
+
+    dog = dogFactory.Build(new { Name = "Rover" });
+    // dog.Name is "Rover"
 
 Create() builds your object using Build() and then either calls a parameterless method or executes some arbitrary logic with your object.  You can use Factory.CreateMethod to specify a method to call on your instance to "Save" it or CreateAction to specify a lambda to run using your instance.  If you need a particular instance to use a unique CreateMethod/Action, you can set factory.InstanceCreateMethod/Action.
 
