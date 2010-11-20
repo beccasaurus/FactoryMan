@@ -200,5 +200,5 @@ License
 FactoryMan is released under the MIT license.
 
 [factory_girl]:  http://github.com/thoughtbot/factory_girl
-[Download .dll]: http://github.com/remi/FactoryMan/raw/1.0.1.0/FactoryMan/bin/Debug/FactoryMan.dll
+[Download .dll]: http://github.com/remi/FactoryMan/raw/1.0.1.0/FactoryMan/bin/Release/FactoryMan.dll
 [Browse Source]: http://github.com/remi/FactoryMan/tree/1.0.1.0
