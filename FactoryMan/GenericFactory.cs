@@ -79,7 +79,7 @@ namespace FactoryMan.Generic {
                     properties[property.Key] = property.Value;
 
             foreach (var property in properties)
-                if (property.Value.GetType().FullName.StartsWith("System.Func")) { // call Invoke() if it's a Func
+                if (property.Value != null && property.Value.GetType().FullName.StartsWith("System.Func")) { // call Invoke() if it's a Func
                     var value = property.Value.GetType().GetMethod("Invoke").Invoke(property.Value, new object[] { instance });
                     ObjectType.GetProperty(property.Key).SetValue(instance, value, new object[] { });
                 } else

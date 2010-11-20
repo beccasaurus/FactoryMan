@@ -367,6 +367,20 @@ namespace FactoryMan.Specs {
             Assert.That(toy.Dog.Name, Is.EqualTo("CUSTOMIZE DOG NAME!"));
         }
 
+        [Test]
+        public void CanSpecifyNullValuesInPropertiesToForcePropertyToBeSetToNull() {
+            var dog = f.Dog.Build(new { Name = (object) null, Breed = "A breed" }) as Dog;
+            Assert.Null(dog.Name);
+            Assert.That(dog.Breed, Is.EqualTo("A breed"));
+        }
+
+        [Test]
+        public void CanUseFactoryNullIsYouWantForACleanerNullSyntax() {
+            var dog = f.Dog.Build(new { Name = Factory.Null, Breed = "A breed" }) as Dog;
+            Assert.Null(dog.Name);
+            Assert.That(dog.Breed, Is.EqualTo("A breed"));
+        }
+
         // Wishlist:
         //
         // FactoryPropertiesCanBeADictionaryInsteadOfAnObject (?)

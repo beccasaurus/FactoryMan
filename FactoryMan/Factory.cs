@@ -25,6 +25,9 @@ namespace FactoryMan {
             return new Factory(objectType, anonymousType);
         }
 
+        // Gives you the option of using Factory.Null as anonymous type values instead of "(object) null"
+        public static object Null = (object) null;
+
         public static string         CreateMethod;
         public static Action<object> CreateAction;
 
@@ -131,7 +134,7 @@ namespace FactoryMan {
                     properties[property.Key] = property.Value;
 
             foreach (var property in properties)
-                if (property.Value.GetType().FullName.StartsWith("System.Func")) { // call Invoke() if it's a Func
+                if (property.Value != null && property.Value.GetType().FullName.StartsWith("System.Func")) { // call Invoke() if it's a Func
                     var value = property.Value.GetType().GetMethod("Invoke").Invoke(property.Value, new object[] { instance });
                     ObjectType.GetProperty(property.Key).SetValue(instance, value, new object[] { });
                 } else
