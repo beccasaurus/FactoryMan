@@ -173,8 +173,7 @@ For now, here is some example usage from one of the specs ([GenericFactorySpec.c
 
     [TestFixture]
     public class DogTest {
-
-        Factories f = new Factories();
+        Factories f = Factories.F;
 
         [Test]
         public void RequiresBreed() {
