@@ -178,18 +178,18 @@ For now, here is some example usage from one of the specs ([GenericFactorySpec.c
 
         [Test]
         public void RequiresBreed() {
-            Assert.False( f.Dog.Build(new { Breed = null     }).IsValid );
-            Assert.False( f.Dog.Build(new { Breed = ""       }).IsValid );
-            Assert.True(  f.Dog.Build(new { Breed = "Beagle" }));
+            Assert.False( f.Dog.Build(new { Breed = (object) null }).IsValid );
+            Assert.False( f.Dog.Build(new { Breed = ""            }).IsValid );
+            Assert.True(  f.Dog.Build(new { Breed = "Beagle"      }).IsValid );
         }
 
         [Test]
-        public void RequiresUniqueName) {
-            Assert.False(f.Dog.Create(new { Username = null        }));
-            Assert.False(f.Dog.Create(new { Username = ""          }));
-            Assert.True( f.Dog.Create(new { Username = "BobSmith"  }));
-            Assert.False(f.Dog.Create(new { Username = "BobSmith"  }));
-            Assert.True( f.Dog.Create(new { Username = "Different" }));
+        public void RequiresUniqueName() {
+            Assert.False( f.Dog.Create(new { Username = (object) null }).IsValid );
+            Assert.False( f.Dog.Create(new { Username = ""            }).IsValid );
+            Assert.True(  f.Dog.Create(new { Username = "BobSmith"    }).IsValid );
+            Assert.False( f.Dog.Create(new { Username = "BobSmith"    }).IsValid );
+            Assert.True(  f.Dog.Create(new { Username = "Different"   }).IsValid );
         }
 
     }
