@@ -153,12 +153,12 @@ namespace FactoryMan.Specs {
         }
 
         [Test]
-        public void CreateCanCallAMethodToSaveInstance() {
+        public void CreateCanCallAnActionToSaveInstance() {
             var factory = new Factory(typeof(Dog)).
                             Add("Name", "Snoopy").
-                            Add("Breed", (d) => string.Format("A breed for {0} the dog", ((Dog)d).Name));
+                            Add("Breed", (d) => string.Format("A breed for {0} the dog", (d as Dog).Name));
 
-            factory.InstanceCreateAction = (d) => ((Dog)d).Save();
+            factory.InstanceCreateAction = (d) => (d as Dog).Save();
 
             var dog = factory.Gen() as Dog; // <--- alias for Create()
             Assert.That(dog.Name, Is.EqualTo("Snoopy"));
@@ -167,12 +167,38 @@ namespace FactoryMan.Specs {
         }
 
         [Test]
-        public void CreateCanCallAnActionToSaveInstance() {
+        public void CanSetCreateActionViaFluentMethod() {
+            var factory = new Factory(typeof(Dog)).
+                Add("Name", "Snoopy").
+                Add("Breed", (d) => string.Format("A breed for {0} the dog", (d as Dog).Name)).
+                SetCreateAction(d => (d as Dog).Save());
+
+            var dog = factory.Gen() as Dog; // <--- alias for Create()
+            Assert.That(dog.Name, Is.EqualTo("Snoopy"));
+            Assert.That(dog.Breed, Is.EqualTo("A breed for Snoopy the dog"));
+            Assert.True(dog.IsSaved);
+        }
+
+        [Test]
+        public void CreateCanCallAMethodToSaveInstance() {
             var factory = new Factory(typeof(Dog)).
                             Add("Name", "Snoopy").
-                            Add("Breed", (d) => string.Format("A breed for {0} the dog", ((Dog)d).Name));
+                            Add("Breed", (d) => string.Format("A breed for {0} the dog", (d as Dog).Name));
 
             factory.InstanceCreateMethod = "Save";
+
+            var dog = factory.Create() as Dog;
+            Assert.That(dog.Name, Is.EqualTo("Snoopy"));
+            Assert.That(dog.Breed, Is.EqualTo("A breed for Snoopy the dog"));
+            Assert.True(dog.IsSaved);
+        }
+
+        [Test]
+        public void CanSetCreateMethodViaFluentMethod() {
+            var factory = new Factory(typeof(Dog)).
+                            Add("Name", "Snoopy").
+                            Add("Breed", (d) => string.Format("A breed for {0} the dog", (d as Dog).Name)).
+                            SetCreateMethod("Save");
 
             var dog = factory.Create() as Dog;
             Assert.That(dog.Name, Is.EqualTo("Snoopy"));
