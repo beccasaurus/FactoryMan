@@ -52,6 +52,15 @@ namespace FactoryMan {
             Add(anonymousType);
         }
 
+        public virtual Factory SetCreateMethod(string method) {
+            InstanceCreateMethod = method;
+            return this;
+        }
+        public virtual Factory SetCreateAction(Action<object> action) {
+            InstanceCreateAction = action;
+            return this;
+        }
+
         public virtual Type ObjectType { get; set; }
         public virtual Action<object> InstanceCreateAction { get; set; }
         public virtual string InstanceCreateMethod { get; set; }
@@ -126,11 +135,14 @@ namespace FactoryMan {
             return Build(null);
         }
         public virtual object Build(object overrides) {
+            return Build(overrides.ToDictionary());
+        }
+        public virtual object Build(IDictionary<string,object> overrides) {
             var instance   = Activator.CreateInstance(ObjectType);
             var properties = Properties;
 
             if (overrides != null)
-                foreach (var property in overrides.ToDictionary())
+                foreach (var property in overrides)
                     properties[property.Key] = property.Value;
 
             foreach (var property in properties)
@@ -152,8 +164,10 @@ namespace FactoryMan {
             RunCreateAction(instance);
             return instance;
         }
-
         public virtual object Create(object overrides) {
+            return Create(overrides.ToDictionary());
+        }
+        public virtual object Create(IDictionary<string,object> overrides) {
             var instance = Build(overrides);
             RunCreateAction(instance);
             return instance;

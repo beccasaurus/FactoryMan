@@ -13,6 +13,8 @@ namespace FactoryMan.Generic {
         new Dictionary<string, Func<T, object>> _funcProperties = new Dictionary<string, Func<T, object>>();
         new public Action<T> CreateAction { get; set; }
 
+        new public Action<T> InstanceCreateAction { get; set; }
+
         public Factory() {
             base._typedFuncProperties = _funcProperties;
         }
@@ -25,6 +27,15 @@ namespace FactoryMan.Generic {
         public Factory(object anonymousType) {
             base._typedFuncProperties = _funcProperties;
             Add(anonymousType);
+        }
+
+        public virtual Factory<T> SetCreateMethod(string method) {
+            InstanceCreateMethod = method;
+            return this;
+        }
+        public virtual Factory<T> SetCreateAction(Action<T> action) {
+            InstanceCreateAction = action;
+            return this;
         }
 
         public override Type ObjectType { get { return typeof(T); } }
@@ -69,13 +80,15 @@ namespace FactoryMan.Generic {
         public new T Build() {
             return Build(null);
         }
-
         public new T Build(object overrides) {
+            return Build(overrides.ToDictionary());
+        }
+        public new T Build(IDictionary<string,object> overrides) {
             var instance = Activator.CreateInstance<T>();
             var properties = Properties;
 
             if (overrides != null)
-                foreach (var property in overrides.ToDictionary())
+                foreach (var property in overrides)
                     properties[property.Key] = property.Value;
 
             foreach (var property in properties)
@@ -97,22 +110,26 @@ namespace FactoryMan.Generic {
             RunCreateAction(instance);
             return instance;
         }
-
         public new T Create(object overrides) {
+            return Create(overrides.ToDictionary());
+        }
+        public new T Create(IDictionary<string,object> overrides) {
             var instance = Build(overrides);
             RunCreateAction(instance);
             return instance;
         }
 
         void RunCreateAction(T instance) {
-            try {
-                base.RunCreateAction(instance);
-            } catch (Exception ex) {
-                if (ex.Message.Contains("Don't know how to Create") && CreateAction != null)
-                    CreateAction(instance);
-                else
-                    throw ex;
-            }
+            if (InstanceCreateAction != null)
+                InstanceCreateAction.Invoke(instance);
+            else if (InstanceCreateMethod != null)
+                ObjectType.GetMethod(InstanceCreateMethod).Invoke(instance, new object[] { });
+            else if (CreateAction != null)
+                CreateAction.Invoke(instance);
+            else if (CreateMethod != null)
+                ObjectType.GetMethod(CreateMethod).Invoke(instance, new object[] { });
+            else
+                throw new Exception("Don't know how to Create().  Please set CreateAction or CreateMethod.");
         }
     }
 }

@@ -142,7 +142,7 @@ namespace FactoryMan.Specs {
         }
 
         [Test]
-        public void CreateCanCallAMethodToSaveInstance() {
+        public void CreateCanCallAnActionToSaveInstance() {
             var factory = new Factory<Dog>().
                             Add("Name", "Snoopy").
                             Add("Breed", (d) => string.Format("A breed for {0} the dog", d.Name));
@@ -156,12 +156,38 @@ namespace FactoryMan.Specs {
         }
 
         [Test]
-        public void CreateCanCallAnActionToSaveInstance() {
+        public void CanSetCreateActionViaFluentMethod() {
+            var factory = new Factory<Dog>().
+                Add("Name", "Snoopy").
+                Add("Breed", (d) => string.Format("A breed for {0} the dog", d.Name)).
+                SetCreateAction(d => d.Save());
+
+            var dog = factory.Gen(); // <--- alias for Create()
+            Assert.That(dog.Name, Is.EqualTo("Snoopy"));
+            Assert.That(dog.Breed, Is.EqualTo("A breed for Snoopy the dog"));
+            Assert.True(dog.IsSaved);
+        }
+
+        [Test]
+        public void CreateCanCallAMethodToSaveInstance() {
             var factory = new Factory<Dog>().
                             Add("Name", "Snoopy").
                             Add("Breed", (d) => string.Format("A breed for {0} the dog", d.Name));
 
             factory.InstanceCreateMethod = "Save";
+
+            var dog = factory.Create();
+            Assert.That(dog.Name, Is.EqualTo("Snoopy"));
+            Assert.That(dog.Breed, Is.EqualTo("A breed for Snoopy the dog"));
+            Assert.True(dog.IsSaved);
+        }
+
+        [Test]
+        public void CanSetCreateMethodViaFluentMethod() {
+            var factory = new Factory<Dog>().
+                            Add("Name", "Snoopy").
+                            Add("Breed", (d) => string.Format("A breed for {0} the dog", d.Name)).
+                            SetCreateMethod("Save");
 
             var dog = factory.Create();
             Assert.That(dog.Name, Is.EqualTo("Snoopy"));
@@ -301,7 +327,6 @@ namespace FactoryMan.Specs {
 
             Assert.That(f.Dog.Build().Breed, Is.EqualTo("Golden 4 Retriever"));
             Assert.That(f.Dog.Build().Breed, Is.EqualTo("Golden 5 Retriever"));
-
         }
 
         [Test]
