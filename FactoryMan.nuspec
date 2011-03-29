@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <id>FactoryMan</id>
+    <version>0.1.0.0</version>
+    <authors>remi Taylor</authors>
+    <description>Simple .NET Factories for focused and readable tests</description>
+    <projectUrl>https://github.com/remi/FactoryMan</projectUrl>
+  </metadata>
+  <files>
+    <file src="FactoryMan\bin\Release\FactoryMan.dll" target="lib" />
+    <file src="FactoryMan\**.cs" target="src" />
+    <file src="README.markdown" />
+  </files>
+</package>
