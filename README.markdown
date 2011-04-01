@@ -147,48 +147,45 @@ chance to use FactoryMan more, I will probably provide some best practices and a
 
 For now, here is some example usage from one of the specs ([GenericFactorySpec.cs](http://github.com/remi/FactoryMan/blob/master/Specs/GenericFactorySpec.cs#L10-36))
 
-    // You don't have to use factories this way.  This is just one way to make your factories available to your tests.
-    // You could also manage a List<Factory>, but you'll lose the benefit of typing that generic factories give you.
-    // That's why I like to make strongly typed fields for each of my factories.
-
-    using FactoryMan.Generic;
-    using FactoryMan.Sequences;
+    // You don't have to use factories this way.  This is just one way to make your factories available to your tests!
 
     public class Factories {
-        public static Factories F = new Factories();
 
-        public static Sequence Num   = new Sequence(n => n.ToString());
-        public static Sequence Breed = new Sequence(n => "Golden " + n.ToString() + " Retriever");
-
-        public Factory<Dog> Dog = new Factory<Dog>(new {
-            Name  = new Func<Dog, object>(d => "Rover #" + Num.Next()),
-            Breed = new Func<Dog, object>(d => Breed.Next())
-        });
-
-        public Factory<DogToy> DogToy = new Factory<DogToy>(new {
-            Name = "Kong",
-            Dog  = new Func<DogToy, object>(dt => F.Dog.Build()) // Creating a DogToy creates a Dog to associate to it
-        });
+    	public Factories() {
+    	    FactoryMan.Factory.CreateMethod = "Save";
+    	}
+    	
+    	public object Null = FactoryMan.Factory.Null;
+    	
+    	public static Sequence Username     = new Sequence(i => string.Format("bobsmith{0}", i));
+    	public static Sequence EmailAddress = new Sequence(i => string.Format("bob.{0}@smith.com", i));
+    	
+    	public Factory<User> User = new Factory<User>().
+    	    Add("Username",  u => Username.Next()).
+    	    Add("Email",     u => EmailAddress.Next()).
+    	    Add("Admin",     false).
+    	    Add("FirstName", "Bob").
+    	    Add("LastName",  "Smith");
     }
 
     [TestFixture]
-    public class DogTest {
+    public class UserTest {
         Factories f = Factories.F;
 
         [Test]
-        public void RequiresBreed() {
-            Assert.False( f.Dog.Build(new { Breed = (object) null }).IsValid );
-            Assert.False( f.Dog.Build(new { Breed = ""            }).IsValid );
-            Assert.True(  f.Dog.Build(new { Breed = "Beagle"      }).IsValid );
+        public void requires_username() {
+            Assert.False( f.User.Build(new { Username = f.Null  }).IsValid );
+            Assert.False( f.User.Build(new { Username = ""      }).IsValid );
+            Assert.True(  f.User.Build(new { Username = "sally" }).IsValid );
         }
 
         [Test]
-        public void RequiresUniqueName() {
-            Assert.False( f.Dog.Create(new { Username = (object) null }).IsValid );
-            Assert.False( f.Dog.Create(new { Username = ""            }).IsValid );
-            Assert.True(  f.Dog.Create(new { Username = "BobSmith"    }).IsValid );
-            Assert.False( f.Dog.Create(new { Username = "BobSmith"    }).IsValid );
-            Assert.True(  f.Dog.Create(new { Username = "Different"   }).IsValid );
+        public void requires_unique_email_address() {
+            Assert.False( f.User.Create(new { Email = f.Null                }).IsValid );
+            Assert.False( f.User.Create(new { Email = ""                    }).IsValid );
+            Assert.True(  f.User.Create(new { Email = "sally@smith.com"     }).IsValid );
+            Assert.False( f.User.Create(new { Email = "sally@smith.com"     }).IsValid ); // <-- email already taken
+            Assert.True(  f.User.Create(new { Email = "different@smith.com" }).IsValid );
         }
 
     }
