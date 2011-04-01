@@ -149,6 +149,9 @@ For now, here is some example usage from one of the specs ([GenericFactorySpec.c
 
     // You don't have to use factories this way.  This is just one way to make your factories available to your tests!
 
+    using FactoryMan.Generic;
+    using FactoryMan.Sequences;
+
     public class Factories {
 
     	public Factories() {
