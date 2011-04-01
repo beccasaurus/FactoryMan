@@ -11,6 +11,10 @@ Much of the text from this page is taken verbatim from the [factory_girl][] READ
 Download
 --------
 
+    Install-Package FactoryMan
+
+or:
+
 Latest version: 1.0.1.0
 
 [Download .dll][]
